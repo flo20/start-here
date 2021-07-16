@@ -1,14 +1,15 @@
    import game from "./gamestate";     
-        
-        const TICK_RATE = 3000;
+   import {TICK_RATE} from "./constants";
+   import initButtons from "./buttons";
+  
 
           // function tick () {
           //   console.log("tick", Date.now());
           // }
 
           async function init() {
-            console.log("Starting game");
-
+            //console.log("Starting game");
+            initButtons(game.handleUserAction);
             let nextTimeToTick = Date.now();
 
             function nextAnimationFrame() {

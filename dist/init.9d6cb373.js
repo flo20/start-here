@@ -129,27 +129,80 @@ const gameState = {
   clock: 1,
 
   tick() {
-    this.clock++;
-    console.log("clock", this.clock);
+    this.clock++; //console.log("clock", this.clock);
+
     return this.clock;
+  },
+
+  handleUserAction(icon) {
+    // eslint-disable-next-line no-console
+    console.log(icon);
   }
 
 };
 var _default = gameState;
 exports.default = _default;
-},{}],"init.js":[function(require,module,exports) {
+},{}],"constants.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.TICK_RATE = exports.ICONS = void 0;
+const ICONS = ["fish", "poop", "weather"];
+exports.ICONS = ICONS;
+const TICK_RATE = 3000;
+exports.TICK_RATE = TICK_RATE;
+},{}],"buttons.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = initButtons;
+
+var _constants = require("./constants");
+
+const toggleHighlighted = (icon, show) => document.querySelector(`.${_constants.ICONS[icon]}-icon`).classList.toggle("highlighted", show);
+
+function initButtons(handleUserAction) {
+  let selectedIcon = 0;
+
+  function buttonClick({
+    target
+  }) {
+    if (target.classList.contains("left-btn")) {
+      toggleHighlighted(selectedIcon, false);
+      selectedIcon = (2 + selectedIcon) % _constants.ICONS.length;
+      toggleHighlighted(selectedIcon, true);
+    } else if (target.classList.contains("right-btn")) {
+      toggleHighlighted(selectedIcon, false);
+      selectedIcon = (1 + selectedIcon) % _constants.ICONS.length;
+      toggleHighlighted(selectedIcon, true);
+    } else {
+      handleUserAction(_constants.ICONS[selectedIcon]);
+    }
+  }
+
+  document.querySelector(".buttons").addEventListener("click", buttonClick);
+}
+},{"./constants":"constants.js"}],"init.js":[function(require,module,exports) {
 "use strict";
 
 var _gamestate = _interopRequireDefault(require("./gamestate"));
 
+var _constants = require("./constants");
+
+var _buttons = _interopRequireDefault(require("./buttons"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const TICK_RATE = 3000; // function tick () {
+// function tick () {
 //   console.log("tick", Date.now());
 // }
-
 async function init() {
-  console.log("Starting game");
+  //console.log("Starting game");
+  (0, _buttons.default)(_gamestate.default.handleUserAction);
   let nextTimeToTick = Date.now();
 
   function nextAnimationFrame() {
@@ -158,7 +211,7 @@ async function init() {
     if (nextTimeToTick <= now) {
       _gamestate.default.tick();
 
-      nextTimeToTick = now + TICK_RATE;
+      nextTimeToTick = now + _constants.TICK_RATE;
     }
 
     requestAnimationFrame(nextAnimationFrame);
@@ -168,7 +221,7 @@ async function init() {
 }
 
 init();
-},{"./gamestate":"gamestate.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./gamestate":"gamestate.js","./constants":"constants.js","./buttons":"buttons.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -196,7 +249,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55135" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56197" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

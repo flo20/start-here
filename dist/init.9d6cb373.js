@@ -123,23 +123,71 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports.default = exports.handleUserAction = void 0;
 const gameState = {
   current: "INIT",
   clock: 1,
+  wakeTime: -1,
 
+  //-1 indicates that nothing is happening in this state. It can also be assigned as undefined
   tick() {
     this.clock++; //console.log("clock", this.clock);
 
     return this.clock;
   },
 
+  startGame() {
+    console.log("Hatching");
+    this.current = "HATCHING";
+    this.wakeTime = this.clock + 3;
+  },
+
+  wake() {
+    console.log("awoken");
+    this.current = "IDLING";
+    this.wakeTime = -1;
+  },
+
   handleUserAction(icon) {
-    // eslint-disable-next-line no-console
-    console.log(icon);
+    if (["SLEEP", "FEEDING", "CELEBRATING", "HATCHING"].includes(this.current)) {//do nothing in these states
+    }
+
+    if (this.current === "INIT" || this.current === "DEAD") {
+      this.startGame();
+      return;
+    }
+
+    switch (icon) {
+      case "weather":
+        this.changeWeather();
+        break;
+
+      case "poop":
+        this.changePoop();
+        break;
+
+      case "fish":
+        this.feed();
+        break;
+    }
+  },
+
+  changeWeather() {
+    console.log("Change weather");
+  },
+
+  changePoop() {
+    console.log("Clean poop");
+  },
+
+  feed() {
+    console.log("Feed");
   }
 
-};
+}; //window.gameState = gameState;
+
+const handleUserAction = gameState.handleUserAction.bind(gameState);
+exports.handleUserAction = handleUserAction;
 var _default = gameState;
 exports.default = _default;
 },{}],"constants.js":[function(require,module,exports) {
@@ -189,7 +237,7 @@ function initButtons(handleUserAction) {
 },{"./constants":"constants.js"}],"init.js":[function(require,module,exports) {
 "use strict";
 
-var _gamestate = _interopRequireDefault(require("./gamestate"));
+var _gamestate = _interopRequireWildcard(require("./gamestate"));
 
 var _constants = require("./constants");
 
@@ -197,12 +245,16 @@ var _buttons = _interopRequireDefault(require("./buttons"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
 // function tick () {
 //   console.log("tick", Date.now());
 // }
 async function init() {
   //console.log("Starting game");
-  (0, _buttons.default)(_gamestate.default.handleUserAction);
+  (0, _buttons.default)(_gamestate.handleUserAction);
   let nextTimeToTick = Date.now();
 
   function nextAnimationFrame() {
@@ -249,7 +301,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56197" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60008" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

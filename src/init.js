@@ -1,4 +1,4 @@
-   import game from "./gamestate";     
+   import game,{handleUserAction} from "./gamestate";     
    import {TICK_RATE} from "./constants";
    import initButtons from "./buttons";
   
@@ -9,7 +9,7 @@
 
           async function init() {
             //console.log("Starting game");
-            initButtons(game.handleUserAction);
+            initButtons(handleUserAction);
             let nextTimeToTick = Date.now();
 
             function nextAnimationFrame() {

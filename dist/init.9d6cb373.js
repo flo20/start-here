@@ -117,13 +117,59 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"gamestate.js":[function(require,module,exports) {
+})({"constants.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.RAIN_CHANCE = exports.SCENES = exports.TICK_RATE = exports.ICONS = void 0;
+const ICONS = ["fish", "poop", "weather"];
+exports.ICONS = ICONS;
+const TICK_RATE = 3000;
+exports.TICK_RATE = TICK_RATE;
+const SCENES = ["day", "rain"];
+exports.SCENES = SCENES;
+const RAIN_CHANCE = 0.9;
+exports.RAIN_CHANCE = RAIN_CHANCE;
+},{}],"ui.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.togglePoopBag = exports.modScene = exports.modFox = void 0;
+
+const modFox = function modFox(state) {
+  //dynamic changes based on the fox' state
+  document.querySelector(".fox").className = `fox fox-${state}`;
+};
+
+exports.modFox = modFox;
+
+const modScene = function modScene(state) {
+  document.querySelector(".game").className = `game ${state}`;
+};
+
+exports.modScene = modScene;
+
+const togglePoopBag = function togglePoopBag(show) {
+  document.querySelector(".poop-bag").classList.toggle("hidden", !show);
+};
+
+exports.togglePoopBag = togglePoopBag;
+},{}],"gamestate.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = exports.handleUserAction = void 0;
+
+var _constants = require("./constants");
+
+var _ui = require("./ui");
+
 const gameState = {
   current: "INIT",
   clock: 1,
@@ -131,21 +177,31 @@ const gameState = {
 
   //-1 indicates that nothing is happening in this state. It can also be assigned as undefined
   tick() {
-    this.clock++; //console.log("clock", this.clock);
+    this.clock++;
+    console.log("clock", this.clock);
+
+    if (this.clock === this.wakeTime) {
+      this.wake();
+    }
 
     return this.clock;
   },
 
   startGame() {
-    console.log("Hatching");
+    //console.log("Hatching");
     this.current = "HATCHING";
     this.wakeTime = this.clock + 3;
+    (0, _ui.modFox)("egg");
+    (0, _ui.modScene)("day");
   },
 
   wake() {
     console.log("awoken");
     this.current = "IDLING";
     this.wakeTime = -1;
+    (0, _ui.modFox)("idling");
+    this.scene = Math.random() > _constants.RAIN_CHANCE ? 0 : 1;
+    (0, _ui.modScene)(_constants.SCENES[this.scene]);
   },
 
   handleUserAction(icon) {
@@ -190,18 +246,7 @@ const handleUserAction = gameState.handleUserAction.bind(gameState);
 exports.handleUserAction = handleUserAction;
 var _default = gameState;
 exports.default = _default;
-},{}],"constants.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.TICK_RATE = exports.ICONS = void 0;
-const ICONS = ["fish", "poop", "weather"];
-exports.ICONS = ICONS;
-const TICK_RATE = 3000;
-exports.TICK_RATE = TICK_RATE;
-},{}],"buttons.js":[function(require,module,exports) {
+},{"./constants":"constants.js","./ui":"ui.js"}],"buttons.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -301,7 +346,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60008" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53470" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

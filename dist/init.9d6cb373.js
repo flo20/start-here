@@ -123,15 +123,32 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.RAIN_CHANCE = exports.SCENES = exports.TICK_RATE = exports.ICONS = void 0;
+exports.getNextPoopTime = exports.getNextDieTime = exports.getNextHungerTime = exports.NIGHT_LENGTH = exports.DAY_LENGTH = exports.RAIN_CHANCE = exports.SCENES = exports.TICK_RATE = exports.ICONS = void 0;
 const ICONS = ["fish", "poop", "weather"];
 exports.ICONS = ICONS;
 const TICK_RATE = 3000;
 exports.TICK_RATE = TICK_RATE;
 const SCENES = ["day", "rain"];
 exports.SCENES = SCENES;
-const RAIN_CHANCE = 0.9;
+const RAIN_CHANCE = 0.1;
 exports.RAIN_CHANCE = RAIN_CHANCE;
+const DAY_LENGTH = 60;
+exports.DAY_LENGTH = DAY_LENGTH;
+const NIGHT_LENGTH = 3; //this should happen when fox is hungry or dies
+
+exports.NIGHT_LENGTH = NIGHT_LENGTH;
+
+const getNextHungerTime = clock => Math.floor(Math.random() * 3) + 5 + clock;
+
+exports.getNextHungerTime = getNextHungerTime;
+
+const getNextDieTime = clock => Math.floor(Math.random() * 2) + 3 + clock;
+
+exports.getNextDieTime = getNextDieTime;
+
+const getNextPoopTime = clock => Math.floor(Math.random() * 3) + 4 + clock;
+
+exports.getNextPoopTime = getNextPoopTime;
 },{}],"ui.js":[function(require,module,exports) {
 "use strict";
 
@@ -174,14 +191,23 @@ const gameState = {
   current: "INIT",
   clock: 1,
   wakeTime: -1,
-
   //-1 indicates that nothing is happening in this state. It can also be assigned as undefined
+  sleepTime: -1,
+  hungryTime: -1,
+  dieTime: -1,
+
   tick() {
     this.clock++;
     console.log("clock", this.clock);
 
     if (this.clock === this.wakeTime) {
       this.wake();
+    } else if (this.clock === this.sleepTime) {
+      this.sleep();
+    } else if (this.clock === this.hungryTime) {
+      this.getHungry();
+    } else if (this.clock === this.dieTime) {
+      this.die();
     }
 
     return this.clock;
@@ -196,12 +222,14 @@ const gameState = {
   },
 
   wake() {
-    console.log("awoken");
+    //console.log("awoken");
     this.current = "IDLING";
     this.wakeTime = -1;
     (0, _ui.modFox)("idling");
     this.scene = Math.random() > _constants.RAIN_CHANCE ? 0 : 1;
     (0, _ui.modScene)(_constants.SCENES[this.scene]);
+    this.hungryTime = (0, _constants.getNextHungerTime)(this.clock);
+    this.sleepTime = this.clock + _constants.DAY_LENGTH;
   },
 
   handleUserAction(icon) {
@@ -238,6 +266,34 @@ const gameState = {
 
   feed() {
     console.log("Feed");
+
+    if (this.current !== "HUNGRY") {
+      return;
+    }
+
+    this.current = "FEEDING";
+    this.dieTime = -1;
+    this.poopTime = getNextPoopTime(this.clock);
+    (0, _ui.modFox)("eating");
+    this.timeToStartCelebrating = this.clock + 2;
+  },
+
+  sleep() {
+    this.current = "SLEEP";
+    (0, _ui.modFox)("sleep");
+    (0, _ui.modScene)("night");
+    this.wakeTime = this.clock + _constants.NIGHT_LENGTH;
+  },
+
+  getHungry() {
+    this.current = "HUNGRY";
+    this.dieTime = (0, _constants.getNextDieTime)(this.clock);
+    this.hungryTime = -1;
+    (0, _ui.modFox)("hungry");
+  },
+
+  die() {
+    console.log("die");
   }
 
 }; //window.gameState = gameState;
